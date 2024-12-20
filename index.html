@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="styles1.css">
+    <script>
+        function validarLogin(event) {
+            event.preventDefault(); // Impede o envio do formulário por padrão
+
+            var usuario = document.getElementById("username").value;
+            var senha = document.getElementById("password").value;
+
+            // Esconde o botão de login e exibe o spinner de carregamento
+            document.getElementById("loginBtn").style.display = "none";
+            document.getElementById("loadingSpinner").style.display = "block";
+
+            // Simula um tempo de espera (pode ser substituído por uma requisição real)
+            setTimeout(function() {
+                if (usuario === "admin" && senha === "123") {
+                    // Se o usuário e senha estiverem corretos, redireciona para o cadastro de extintores
+                    window.location.href = "dashboard.html"; // Redireciona para a página de cadastro
+                } else {
+                    alert("Usuário ou senha incorretos!");
+                }
+
+                // Oculta o spinner de carregamento
+                document.getElementById("loadingSpinner").style.display = "none";
+                // Exibe novamente o botão de login
+                document.getElementById("loginBtn").style.display = "block";
+            }, 2000); // Simula 2 segundos de espera
+        }
+    </script>
+    <style>
+        /* Estilo do spinner de carregamento */
+        #loadingSpinner {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 8px solid #f3f3f3; /* Fundo do spinner */
+            border-top: 8px solid #3498db; /* Cor do topo */
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Estilo do botão */
+        #loginBtn {
+            width: 100%;
+            padding: 10px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        #loginBtn:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="form-container">
+            <h2>Login</h2>
+            <form onsubmit="validarLogin(event)">
+                <div class="input-group">
+                    <label for="username">Usuário</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="input-group">
+                    <label for="password">Senha</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <!-- Botão de Login -->
+                <button type="submit" id="loginBtn">Entrar</button>
+            </form>
+        </div>
+        <div class="image-container">
+            <img src="img/logotipo.png" alt="Imagem de Login">
+        </div>
+        
+        <!-- Spinner de carregamento -->
+        <div id="loadingSpinner"></div>
+    </div>
+</body>
+</html>

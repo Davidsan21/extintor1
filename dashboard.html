@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Extintores</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Cadastro de Extintores</h1>
+        </header>
+
+        <!-- Formulário de Cadastro -->
+        <form id="cadastroForm">
+            <div class="form-group">
+                <label for="prefixo">Prefixo</label>
+                <input type="text" id="prefixo" name="prefixo" required>
+            </div>
+            <div class="form-group">
+                <label for="numero">Número</label>
+                <input type="number" id="numero" name="numero" required>
+            </div>
+            <div class="form-group">
+                <label for="validade">Validade</label>
+                <input type="date" id="validade" name="validade" required>
+            </div>
+            <div class="form-group">
+                <label for="tipo">Tipo</label>
+                <select id="tipo" name="tipo" required>
+                    <option value="ABC">ABC</option>
+                    <option value="BC">BC</option>
+                    <option value="CO2">CO2</option>
+                </select>
+            </div>
+            <button type="submit" class="btn-submit">Cadastrar</button>
+        </form>
+
+        <!-- Tabela de Extintores -->
+        <section id="extintoresListSection">
+            <h2>Extintores Cadastrados</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Prefixo</th>
+                        <th>Número</th>
+                        <th>Validade</th>
+                        <th>Tipo</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="extintoresTableBody">
+                    
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Modal de Edição -->
+        <div id="editModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Editar Extintor</h2>
+                <form id="editForm">
+                    <div class="form-group">
+                        <label for="editPrefixo">Prefixo</label>
+                        <input type="text" id="editPrefixo" name="prefixo" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editNumero">Número</label>
+                        <input type="number" id="editNumero" name="numero" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editValidade">Validade</label>
+                        <input type="date" id="editValidade" name="validade" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editTipo">Tipo</label>
+                        <select id="editTipo" name="tipo" required>
+                            <option value="ABC">ABC</option>
+                            <option value="BC">BC</option>
+                            <option value="CO2">CO2</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-submit">Salvar Alterações</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let extintores = JSON.parse(localStorage.getItem('extintores')) || [];
+        let editIndex = -1;  // Índice do extintor em edição
+
+        // Modal de edição
+        const modal = document.getElementById('editModal');
+        const closeBtn = document.getElementsByClassName('close')[0];
+
+        // Abrir modal de edição
+        function abrirModal(index) {
+            const extintor = extintores[index];
+            editIndex = index; // Armazena o índice do extintor sendo editado
+
+            // Preenche os campos do modal com os dados do extintor
+            document.getElementById('editPrefixo').value = extintor.prefixo;
+            document.getElementById('editNumero').value = extintor.numero;
+            document.getElementById('editValidade').value = extintor.validade;
+            document.getElementById('editTipo').value = extintor.tipo;
+
+            // Exibe o modal
+            modal.style.display = 'block';
+        }
+
+        // Fechar o modal
+        closeBtn.onclick = function() {
+            modal.style.display = 'none';
+        };
+
+        // Fechar o modal se clicar fora dele
+        window.onclick = function(event) {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        };
+
+        // Função para carregar os extintores do localStorage
+        function carregarExtintores() {
+            const tableBody = document.getElementById('extintoresTableBody');
+            tableBody.innerHTML = ''; // Limpa a tabela antes de adicionar os dados
+
+            const hoje = new Date(); // Data atual
+
+            extintores.forEach((extintor, index) => {
+                const tr = document.createElement('tr');
+                
+                // Converter validade para objeto Date
+                const validade = new Date(extintor.validade);
+
+                // Calcular a data de 15 dias antes da validade
+                const data15DiasAntes = new Date(validade);
+                data15DiasAntes.setDate(validade.getDate() - 15);
+
+                // Determinar a cor de fundo baseada na validade
+                let corFundo = '';
+                if (validade < hoje) {
+                    corFundo = 'red'; // Extintor vencido
+                } else if (data15DiasAntes <= hoje && validade > hoje) {
+                    corFundo = 'yellow'; // Extintor com 15 dias para vencer
+                }
+
+                tr.innerHTML = `
+                    <td>${extintor.prefixo}</td>
+                    <td>${extintor.numero}</td>
+                    <td>${extintor.validade}</td>
+                    <td>${extintor.tipo}</td>
+                    <td><button class="delete-btn" onclick="confirmarExclusao(${index})">Excluir</button></td>
+                `;
+                
+                // Aplica a cor de fundo na linha
+                if (corFundo) {
+                    tr.style.backgroundColor = corFundo;
+                }
+
+                tr.ondblclick = function() {
+                    abrirModal(index); // Abre o modal ao clicar duas vezes
+                };
+                tableBody.appendChild(tr);
+            });
+        }
+
+        // Função para verificar a senha e excluir o extintor
+        function confirmarExclusao(index) {
+            const senha = prompt("Digite a senha para excluir o extintor:");
+
+            // Senha do desenvolvedor (alterar conforme necessário)
+            const senhaCorreta = "senha123"; 
+
+            if (senha === senhaCorreta) {
+                deletarExtintor(index); // Exclui o extintor se a senha for correta
+            } else {
+                alert("Senha incorreta. A exclusão foi cancelada.");
+            }
+        }
+
+        // Função para excluir extintores
+        function deletarExtintor(index) {
+            extintores.splice(index, 1);
+            localStorage.setItem('extintores', JSON.stringify(extintores));
+            carregarExtintores();
+        }
+
+        // Função para cadastrar extintores
+        document.getElementById('cadastroForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const prefixo = document.getElementById('prefixo').value;
+            const numero = document.getElementById('numero').value;
+            const validade = document.getElementById('validade').value;
+            const tipo = document.getElementById('tipo').value;
+
+            const extintor = {
+                prefixo,
+                numero,
+                validade,
+                tipo
+            };
+
+            if (editIndex === -1) {
+                extintores.push(extintor); // Adiciona novo extintor
+            } else {
+                extintores[editIndex] = extintor; // Atualiza extintor existente
+                editIndex = -1; // Reseta o índice de edição
+            }
+
+            localStorage.setItem('extintores', JSON.stringify(extintores));
+
+            document.getElementById('cadastroForm').reset();
+            modal.style.display = 'none';  // Fecha o modal de edição
+
+            carregarExtintores();
+        });
+
+        window.onload = function() {
+            carregarExtintores();
+        };
+    </script>
+</body>
+</html>
